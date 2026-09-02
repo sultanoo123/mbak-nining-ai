@@ -1,0 +1,17 @@
+# Environment variables (Wajib di-ignore agar API Key aman)
+.env
+backend/.env
+frontend/.env.local
+
+# Python / Backend
+backend/venv/
+backend/__pycache__/
+backend/audio_output/
+backend/*.mp3
+
+# Node / Frontend
+frontend/node_modules/
+frontend/.next/
+
+# Tambahkan di bagian Python / Backend
+backend/models/
