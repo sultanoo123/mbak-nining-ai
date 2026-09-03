@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css"; // Sesuaikan jika ada file css lain
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Mbak Nining - Asisten AI Setiamu",
@@ -22,6 +22,7 @@ export const metadata: Metadata = {
   },
 };
 
+// PERHATIKAN: Harus ada kata "default" di baris ini
 export default function RootLayout({
   children,
 }: Readonly<{
