@@ -1,66 +1,77 @@
-export function executeAppCommand(intent: string, payload?: string): boolean {
-  // Cek apakah user sedang membuka lewat HP Android
-  const isAndroid = typeof navigator !== "undefined" && /android/i.test(navigator.userAgent);
-  let targetUri = "";
-  let isWebFallback = false;
+export const executeAppCommand = (intent: string, payload: string = "") => {
+  if (typeof window === "undefined") return;
 
-  const encodedPayload = encodeURIComponent(payload || "");
+  const ua = navigator.userAgent || navigator.vendor;
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  const encodedPayload = encodeURIComponent(payload);
 
-  switch (intent) {
-    case "spotify":
-      // Protokol 'spotify:' langsung membuka aplikasi Spotify Desktop di Windows/Mac maupun HP
-      targetUri = payload
-        ? `spotify:search:${encodedPayload}`
-        : `spotify:`;
-      break;
+  // Mapping khusus Android Intent vs iOS Scheme vs Web Fallback
+  const appMap: Record<
+    string,
+    { iosScheme: string; androidIntent: string; webFallback: string }
+  > = {
+    spotify: {
+      iosScheme: payload ? `spotify:search:${encodedPayload}` : "spotify://",
+      androidIntent: payload
+        ? `intent://search/${encodedPayload}#Intent;scheme=spotify;package=com.spotify.music;end`
+        : "intent://#Intent;scheme=spotify;package=com.spotify.music;end",
+      webFallback: payload
+        ? `https://open.spotify.com/search/${encodedPayload}`
+        : "https://open.spotify.com"
+    },
+    youtube: {
+      iosScheme: payload
+        ? `youtube://www.youtube.com/results?search_query=${encodedPayload}`
+        : "youtube://",
+      androidIntent: payload
+        ? `intent://www.youtube.com/results?search_query=${encodedPayload}#Intent;scheme=https;package=com.google.android.youtube;end`
+        : "intent://#Intent;scheme=youtube;package=com.google.android.youtube;end",
+      webFallback: payload
+        ? `https://www.youtube.com/results?search_query=${encodedPayload}`
+        : "https://www.youtube.com"
+    },
+    whatsapp: {
+      iosScheme: "whatsapp://",
+      androidIntent: "intent://#Intent;scheme=whatsapp;package=com.whatsapp;end",
+      webFallback: "https://api.whatsapp.com"
+    },
+    instagram: {
+      iosScheme: "instagram://",
+      androidIntent: "intent://#Intent;scheme=instagram;package=com.instagram.android;end",
+      webFallback: "https://www.instagram.com"
+    },
+    mlbb: {
+      iosScheme: "mobilelegends://",
+      androidIntent: "intent://#Intent;scheme=mobilelegends;package=com.mobile.legends;end",
+      webFallback: "https://m.mobilelegends.com"
+    },
+    pubg: {
+      iosScheme: "igv-pubgmobile://",
+      androidIntent: "intent://#Intent;scheme=pubgmobile;package=com.tencent.ig;end",
+      webFallback: "https://www.pubgmobile.com"
+    }
+  };
 
-    case "youtube":
-      if (isAndroid) {
-        targetUri = payload
-          ? `vnd.youtube://results?search_query=${encodedPayload}`
-          : "vnd.youtube://";
-      } else {
-        // Di laptop, jika ada query panggil YouTube Web search
-        targetUri = payload
-          ? `https://www.youtube.com/results?search_query=${encodedPayload}`
-          : "https://www.youtube.com";
-        isWebFallback = true;
+  const targetApp = appMap[intent.toLowerCase()];
+  if (!targetApp) return;
+
+  if (isAndroid) {
+    // Android: Gunakan Android Intent (Otomatis buka Play Store/App tanpa error popup)
+    window.location.href = targetApp.androidIntent;
+  } else if (isIOS) {
+    // iOS: Panggil scheme, jika app tidak terpasang/diblokir, alihkan ke Web setelah 1 detik
+    const start = Date.now();
+    window.location.href = targetApp.iosScheme;
+
+    setTimeout(() => {
+      // Jika browser masih aktif (tidak ter-minimize ke app game), buka versi Web
+      if (Date.now() - start < 1500) {
+        window.location.href = targetApp.webFallback;
       }
-      break;
-
-    case "whatsapp":
-      // 'whatsapp://' akan membuka aplikasi WhatsApp Desktop di Windows/Mac & App di HP
-      if (isAndroid) {
-        targetUri = payload ? `whatsapp://send?text=${encodedPayload}` : "whatsapp://app";
-      } else {
-        targetUri = payload ? `whatsapp://send?text=${encodedPayload}` : "whatsapp://";
-      }
-      break;
-
-    case "instagram":
-      targetUri = isAndroid ? "instagram://app" : "https://www.instagram.com";
-      if (!isAndroid) isWebFallback = true;
-      break;
-
-    case "mlbb":
-      targetUri = "intent://#Intent;package=com.mobile.legends;scheme=mobilelegends;end";
-      break;
-
-    case "pubg":
-      targetUri = "intent://#Intent;package=com.tencent.ig;scheme=pubgmobile;end";
-      break;
-
-    default:
-      return false;
-  }
-
-  // Jika berupa skema aplikasi native (seperti spotify:, whatsapp://), jalankan via location.href
-  // agar Windows/Android langsung membuka aplikasinya tanpa membuat tab kosong di browser.
-  if (!isWebFallback) {
-    window.location.href = targetUri;
+    }, 1000);
   } else {
-    window.open(targetUri, "_blank");
+    // Desktop: Langsung buka versi Web di tab baru
+    window.open(targetApp.webFallback, "_blank");
   }
-
-  return true;
-}
+};

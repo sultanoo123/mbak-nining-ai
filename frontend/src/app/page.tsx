@@ -206,10 +206,11 @@ export default function NiningAssistantPage() {
       playVoiceResponse(data.audio || data.audioUrl, aiReply);
 
       // C. Eksekusi Perintah Aplikasi jika Intent terdeteksi oleh backend
+      // Eksekusi perintah aplikasi jika Intent terdeteksi oleh backend
       if (data.intent) {
         setTimeout(() => {
           executeAppCommand(data.intent, data.payload || "");
-        }, 800);
+        }, 200);
       }
 
     } catch (err: any) {
