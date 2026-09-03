@@ -1,0 +1,21 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#121214"/>
+  <circle cx="950" cy="315" r="300" fill="#E91E63" fill-opacity="0.15"/>
+  <circle cx="950" cy="315" r="160" fill="url(#pink_grad)"/>
+
+  <!-- Avatar Sparkle Icon -->
+  <path d="M950 235L965 285L1015 300L965 315L950 365L935 315L885 300L935 285L950 235Z" fill="white"/>
+  <path d="M1000 220L1007 242L1030 250L1007 258L1000 280L993 258L970 250L993 242L1000 220Z" fill="#FFD54F"/>
+
+  <!-- Text Info -->
+  <text x="100" y="270" fill="#FF4081" font-family="Arial, sans-serif" font-size="28" font-weight="bold" letter-spacing="2">ASISTEN AI VIRTUAL</text>
+  <text x="100" y="350" fill="white" font-family="Arial, sans-serif" font-size="64" font-weight="bold">Mbak Nining AI</text>
+  <text x="100" y="410" fill="#A0A0AB" font-family="Arial, sans-serif" font-size="24">Teman ngobrol, putar musik, dan buka aplikasi otomatis.</text>
+
+  <defs>
+    <linearGradient id="pink_grad" x1="790" y1="155" x2="1110" y2="475" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF4081"/>
+      <stop offset="1" stop-color="#E91E63"/>
+    </linearGradient>
+  </defs>
+</svg>
