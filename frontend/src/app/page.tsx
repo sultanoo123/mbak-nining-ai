@@ -12,7 +12,6 @@ export default function Home() {
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
 
   // Fungsi memutar audio dengan proteksi kebijakan autoplay mobile browser
   const playAudioTrack = (url: string) => {
@@ -39,14 +38,14 @@ export default function Home() {
     setInputMessage("");
     setIsLoading(true);
 
-    // Buka lock audio browser mobile saat ada sentuhan pengguna
+    // Buka lock audio browser mobile saat ada interaksi pengguna
     if (audioRef.current) {
       audioRef.current.play().catch(() => {});
       audioRef.current.pause();
     }
 
     try {
-      const response = await fetch(`${backendBaseUrl}/chat`, {
+      const response = await fetch('/api/chat', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: outgoingText }),
@@ -59,10 +58,10 @@ export default function Home() {
       const data = await response.json();
       setAiReply(data.reply);
 
+      // Audio langsung diputar dari string base64 bawaan API Route
       if (data.audio_url) {
-        const fullAudioUrl = `${backendBaseUrl}${data.audio_url}?t=${Date.now()}`;
-        setCurrentAudioUrl(fullAudioUrl);
-        playAudioTrack(fullAudioUrl);
+        setCurrentAudioUrl(data.audio_url);
+        playAudioTrack(data.audio_url);
       }
     } catch (err: any) {
       setAiReply("Aduh sayang... servernya lagi ngambek nih, coba sapa Mbak Nining lagi sebentar ya.");
