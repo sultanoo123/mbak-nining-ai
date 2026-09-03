@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./globals.css"; // Sesuaikan jika ada file css lain
 
 export const metadata: Metadata = {
   title: "Mbak Nining - Asisten AI Setiamu",
@@ -20,3 +21,15 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="id">
+      <body>{children}</body>
+    </html>
+  );
+}
