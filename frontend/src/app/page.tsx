@@ -13,18 +13,20 @@ export default function Home() {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Fungsi memutar audio dengan proteksi kebijakan autoplay mobile browser
+  // Fungsi memutar audio & mengontrol animasi denyut avatar
   const playAudioTrack = (url: string) => {
     if (!audioRef.current) return;
 
     audioRef.current.src = url;
     audioRef.current.load();
-    setIsPlayingAudio(true);
 
     audioRef.current
       .play()
+      .then(() => {
+        setIsPlayingAudio(true);
+      })
       .catch((err) => {
-        console.warn("Autoplay ditahan browser, klik tombol volume untuk memutar manual:", err);
+        console.warn("Autoplay ditahan browser, klik tombol putar ulang untuk memutar manual:", err);
         setIsPlayingAudio(false);
       });
   };
@@ -38,7 +40,7 @@ export default function Home() {
     setInputMessage("");
     setIsLoading(true);
 
-    // Buka lock audio browser mobile saat ada interaksi pengguna
+    // Buka lock audio browser mobile saat ada interaksi klik/submit
     if (audioRef.current) {
       audioRef.current.play().catch(() => {});
       audioRef.current.pause();
@@ -56,12 +58,13 @@ export default function Home() {
       }
 
       const data = await response.json();
-      setAiReply(data.reply);
+      setAiReply(data.reply || data.response || data.text);
 
-      // Audio langsung diputar dari string base64 bawaan API Route
-      if (data.audio_url) {
-        setCurrentAudioUrl(data.audio_url);
-        playAudioTrack(data.audio_url);
+      // Ambil audio base64/data URI dan putar langsung lewat audioRef
+      const audioSource = data.audioUrl || data.audio || data.audio_url;
+      if (audioSource) {
+        setCurrentAudioUrl(audioSource);
+        playAudioTrack(audioSource);
       }
     } catch (err: any) {
       setAiReply("Aduh sayang... servernya lagi ngambek nih, coba sapa Mbak Nining lagi sebentar ya.");
@@ -78,17 +81,17 @@ export default function Home() {
       audioRef.current.pause();
       setIsPlayingAudio(false);
     } else {
-      audioRef.current.play();
-      setIsPlayingAudio(true);
+      audioRef.current.play().then(() => setIsPlayingAudio(true)).catch(() => {});
     }
   };
 
   return (
     <main className="min-h-[100dvh] bg-[#070b14] text-gray-100 flex flex-col justify-between items-center p-4 sm:p-6 select-none">
-      {/* Audio Element Hidden */}
+      {/* Audio Element Tersembunyi */}
       <audio
         ref={audioRef}
         onEnded={() => setIsPlayingAudio(false)}
+        onPause={() => setIsPlayingAudio(false)}
         onError={() => setIsPlayingAudio(false)}
         className="hidden"
       />
